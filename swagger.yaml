@@ -1,0 +1,5311 @@
+openapi: 3.0.3
+info:
+  title: TaskMann Services Management System API Documentation
+  version: 0.0.1
+  description: TaskMann Services Core System API Documentation, this browserable documentation is meant to be used in tandem with the TaskMann Core Frontend codebase. new changes to the backend API will reflect here.
+  contact:
+    name: TaskMann Team
+    email: dev@taskmann.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+servers:
+  - url: http://localhost:4200
+    description: Localhost Development Version
+  - url: https://taskmannserver.onrender.com/
+    description: Render Hosted Development Version
+
+tags:
+  - name: Customer
+    description: Customer management
+  - name: Staff
+    description: Staff management
+  - name: Service
+    description: Service management
+  - name: SubService
+    description: SubService management
+  - name: PriceTier
+    description: PriceTier management
+  - name: TeamMember
+    description: TeamMember management
+  - name: Policy
+    description: Policy management
+  - name: Faq
+    description: Faqs management
+  - name: RT
+    description: Review/Testimony management
+  - name: Blog
+    description: Blog management
+  - name: Contact-Us
+    description: Contact management
+  - name: About-Us
+    description: About management
+  - name: Career
+    description: Career management
+  - name: Cart
+    description: Cart management
+  - name: Order
+    description: Order management
+  - name: Payment
+    description: Payment management
+  - name: Admin
+    description: Admin content management
+  - name: Task
+    description: Task management
+
+paths:
+  /api/v1/customer/register:
+    post:
+      tags:
+        - "Customer"
+      summary: Creat a new Customer account
+      description: Endpoint to create and register a new Customer, along with creating new Customer this endpoint also generate email and phone verification tokens.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CustomerRegistrationReq"
+      responses:
+        201:
+          description: "Successfully created a new Customer"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerRegistrationRes"
+        400:
+          description: "Bad Request/Customer already exists"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerRegistrationError400"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+  /api/v1/customer/login:
+    post:
+      tags:
+        - Customer
+      summary: Login a Customer
+      description: Endpoint to login a Customer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CustomerLoginReq"
+      responses:
+        200:
+          description: Successfully logged in a Customer and return a valid JWT auth token"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerLoginRes"
+        400:
+          description: Bad Request / Customer does not exist or password is incorrect / Customer is not verified
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerLoginError400"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+  /api/v1/customer/logout:
+    delete:
+      tags:
+        - Customer
+      summary: Logout a Customer
+      description: Endpoint to logout a Customer
+      responses:
+        200:
+          description: Successfully logged out a Customer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerLogoutRes"
+        400:
+          description: Bad Request / Customer does not exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerLogoutError400"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+  /api/v1/customer/logout_all:
+    delete:
+      tags:
+        - Customer
+      summary: Logout all Customer sessions
+      description: Endpoint to logout all Customer sessions
+      responses:
+        200:
+          description: Successfully logged out all Customer sessions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerLogoutAllRes"
+        400:
+          description: Bad Request / Customer does not exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerLogoutAllError400"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+  /api/v1/customer/verify_email:
+    patch:
+      tags:
+        - Customer
+      summary: Verify a Customer's registration email
+      description: Endpoint to verify a Customer's email used to register
+      parameters:
+        - in: query
+          name: code
+          schema:
+            type: string
+          required: true
+          description: Customer Email verification token/code
+      responses:
+        200:
+          description: Successfully verified a Customer's email
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmailVerificationRes"
+        400:
+          description: Bad Request / Customer does not exist or email is already verified
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmailVerificationError400"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+  /api/v1/customer/verify_phone:
+    patch:
+      deprecated: true
+      tags:
+        - Customer
+      summary: Verify a Customer's registration phone
+      description: Endpoint to verify a Customer's phone used to register, token expires after 10 minutes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PhoneVerificationReq"
+      responses:
+        200:
+          description: Successfully verified a Customer's phone
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PhoneVerificationRes"
+        400:
+          description: Bad Request / Customer does not exist or phone is already verified
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PhoneVerificationError400"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+  /api/v1/customer/forgot_password:
+    patch:
+      tags:
+        - Customer
+      summary: Forgot Password
+      description: Endpoint to initiate password recovery process, note only pass either email or phone, not both
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ForgotPasswordReq"
+      responses:
+        200:
+          description: Successfully sent a reset password email
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ForgotPasswordRes"
+        400:
+          description: Bad Request / Code does not exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ForgotPasswordError400"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+  /api/v1/customer/reset_password:
+    patch:
+      tags:
+        - Customer
+      summary: Reset Password
+      description: Endpoint to reset password after password recovery initiated
+      parameters:
+        - in: query
+          name: token
+          schema:
+            type: string
+          required: true
+          description: Reset forgotten password by providing a valid code and a new password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResetPasswordReq"
+      responses:
+        200:
+          description: Successfully reset password
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResetPasswordRes"
+        400:
+          description: Bad Request / Code does not exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResetPasswordError400"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+  /api/v1/customer/:
+    get:
+      security:
+        - JWTAuth: []
+      tags:
+        - Customer
+      summary: Get Customer Profile
+      description: Endpoint to get Customer profile
+      responses:
+        200:
+          description: Successfully fetched Customer profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerObject"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+  /api/v1/customers/:
+    get:
+      security:
+        - JWTAuth: []
+      tags:
+        - Customer
+      summary: Get All Customers
+      description: Endpoint to get all Customers
+      responses:
+        200:
+          description: Successfully fetched all Customers
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerObject"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+
+  /api/v1/customer/{id}:
+    get:
+      security:
+        - JWTAuth: []
+      tags:
+        - Customer
+      summary: Get Customer Profile by ID
+      description: Endpoint to get Customer profile by ID
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: Customer ID
+      responses:
+        200:
+          description: Successfully fetched Customer profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerObject"
+        400:
+          description: Bad Request / Customer data does not exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+  /api/v1/customer/update:
+    patch:
+      security:
+        - JWTAuth: []
+      tags:
+        - Customer
+      summary: Update Customer Profile
+      description: Endpoint to update Customer profile, customer profile image cant be updated here
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCustomerReq"
+      responses:
+        200:
+          description: Successfully updated Customer profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdateCustomerRes"
+        400:
+          description: Bad Request / Customer data does not exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+
+  /api/v1/customer/add_profile_image:
+    patch:
+      security:
+        - JWTAuth: []
+      tags:
+        - Customer
+      summary: Add or Update customer profile
+      description: Endpoint to add or update customer profile_image
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                upload:
+                  type: string
+                  format: binary
+                  description: File to be uploaded must be a valid image
+      responses:
+        200:
+          description: Successfully uploaded customer profile image
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/profile_image_Res"
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequest400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+
+  /api/v1/customer/change_password:
+    patch:
+      security:
+        - JWTAuth: []
+      tags:
+        - Customer
+      summary: Change Password
+      description: Endpoint to change Customer password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangePasswordReq"
+      responses:
+        200:
+          description: Successfully changed Customer password
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChangePasswordRes"
+        400:
+          description: Bad Request / Customer data does not exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+  /api/v1/customer/resend_verification_code:
+    patch:
+      tags:
+        - Customer
+      summary: Send Verification Code
+      description: Endpoint to send verification code to Customer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendVerificationCodeReq"
+      responses:
+        200:
+          description: Successfully sent verification code
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SendVerificationCodeRes"
+        400:
+          description: Bad Request / Customer data does not exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+
+  /api/v1/staff/register:
+    post:
+      tags:
+        - "Staff"
+      summary: Creat a new Staff Object
+      description: Endpoint to create and register a new Staff, along with creating new Staff this endpoint also generate email and phone verification tokens, type of staffs are [STAFF, MANAGER] and roles are [ADMIN, STAFF, MANAGER].
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StaffRegistrationReq"
+      responses:
+        201:
+          description: "Successfully created a new Staff"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StaffRegistrationRes"
+        400:
+          description: "Bad Request/Staff already exists"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StaffRegistrationError400"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+  /api/v1/staff/login:
+    post:
+      tags:
+        - Staff
+      summary: Login a Staff
+      description: Endpoint to login a Staff
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StaffLoginReq"
+      responses:
+        200:
+          description: Successfully logged in a Staff and return a valid JWT auth token"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StaffLoginRes"
+        400:
+          description: Bad Request / Staff does not exist or password is incorrect / Staff is not verified
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StaffLoginError400"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+  /api/v1/staff/logout:
+    delete:
+      security:
+        - JWTAuth: []
+      tags:
+        - Staff
+      summary: Logout a Staff
+      description: Endpoint to logout a Staff
+      responses:
+        200:
+          description: Successfully logged out a Staff
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StaffLogoutRes"
+        400:
+          description: Bad Request / Staff does not exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StaffLogoutError400"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+  /api/v1/staff/logout_all:
+    delete:
+      security:
+        - JWTAuth: []
+      tags:
+        - Staff
+      summary: Logout all Staffs
+      description: Endpoint to logout all Staffs
+      responses:
+        200:
+          description: Successfully logged out all Staffs
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StaffLogoutAllRes"
+        400:
+          description: Bad Request / Staff does not exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StaffLogoutAllError400"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+  /api/v1/staff/verify_email:
+    patch:
+      tags:
+        - Staff
+      summary: Verify a Staff's registration email
+      description: Endpoint to verify a Staff's email used to register
+      parameters:
+        - in: query
+          name: code
+          schema:
+            type: string
+          required: true
+          description: Staff Email verification token/code
+      responses:
+        200:
+          description: Successfully verified a Staff's email
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmailVerificationRes"
+        400:
+          description: Bad Request / Staff does not exist or email is already verified
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmailVerificationError400"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+  /api/v1/staff/verify_phone:
+    patch:
+      deprecated: true
+      tags:
+        - Staff
+      summary: Verify a Staff's registration phone
+      description: Endpoint to verify a Staff's phone used to register, token expires after 10 minutes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PhoneVerificationReq"
+      responses:
+        200:
+          description: Successfully verified a Staff's phone
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PhoneVerificationRes"
+        400:
+          description: Bad Request / Staff does not exist or phone is already verified
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PhoneVerificationError400"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+  /api/v1/staff/forgot_password:
+    patch:
+      tags:
+        - Staff
+      summary: Forgot Password
+      description: Endpoint to initiate password recovery process, note only pass either email or phone, not both
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ForgotPasswordReq"
+      responses:
+        200:
+          description: Successfully sent a reset password email
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ForgotPasswordRes"
+        400:
+          description: Bad Request / Code does not exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ForgotPasswordError400"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+  /api/v1/staff/reset_password:
+    patch:
+      tags:
+        - Staff
+      summary: Reset Password
+      description: Endpoint to reset password after password recovery initiated
+      parameters:
+        - in: query
+          name: token
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResetPasswordReq"
+      responses:
+        200:
+          description: Successfully reset password
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResetPasswordRes"
+        400:
+          description: Bad Request / Code does not exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResetPasswordError400"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+  /api/v1/staff/:
+    get:
+      security:
+        - JWTAuth: []
+      tags:
+        - Staff
+      summary: Get Staff Profile
+      description: Endpoint to get Staff profile
+      responses:
+        200:
+          description: Successfully fetched Staff profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StaffObject"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+  /api/v1/staffs/:
+    get:
+      security:
+        - JWTAuth: []
+      tags:
+        - Staff
+      summary: Get All Staffs
+      description: Endpoint to get all Staffs
+      responses:
+        200:
+          description: Successfully fetched all Staffs
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StaffObject"
+        400:
+          description: Bad Request / Staff does not exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+  /api/v1/staff/{id}:
+    get:
+      deprecated: true
+      security:
+        - JWTAuth: []
+      tags:
+        - Staff
+      summary: Get Staff Profile by ID
+      description: Endpoint to get Staff profile by ID
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: Staff ID
+      responses:
+        200:
+          description: Successfully fetched Staff profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StaffObject"
+        400:
+          description: Bad Request / Staff data does not exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+  /api/v1/staff/update:
+    patch:
+      security:
+        - JWTAuth: []
+      tags:
+        - Staff
+      summary: Update Staff Profile
+      description: Endpoint to update Staff profile, staff profile image cant be updated here
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateStaffReq"
+      responses:
+        200:
+          description: Successfully updated Staff profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdateStaffRes"
+        400:
+          description: Bad Request / Staff data does not exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+
+  /api/v1/staff/update_role:
+    patch:
+      security:
+        - JWTAuth: []
+      tags:
+        - Staff
+      summary: Update Staff Role
+      description: Endpoint to update Staff role
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateStaffRole"
+      responses:
+        200:
+          description: Successfully updated Staff profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdateStaffRes"
+        400:
+          description: Bad Request / Staff data does not exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+
+  /api/v1/staff/add_profile_image:
+    patch:
+      security:
+        - JWTAuth: []
+      tags:
+        - Staff
+      summary: Add or Update staff profile
+      description: Endpoint to add or update staff profile_image
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                upload:
+                  type: string
+                  format: binary
+                  description: File to be uploaded must be a valid image
+      responses:
+        200:
+          description: Successfully uploaded staff profile image
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/profile_image_Res"
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequest400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+
+  /api/v1/staff/change_password:
+    patch:
+      security:
+        - JWTAuth: []
+      tags:
+        - Staff
+      summary: Change Password
+      description: Endpoint to change Staff password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangePasswordReq"
+      responses:
+        200:
+          description: Successfully changed Staff password
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChangePasswordRes"
+        400:
+          description: Bad Request / Staff data does not exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+  /api/v1/staff/resend_verification_code:
+    patch:
+      tags:
+        - Staff
+      summary: Send Verification Code
+      description: Endpoint to send verification code to Staff
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendVerificationCodeReq"
+      responses:
+        200:
+          description: Successfully sent verification code
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SendVerificationCodeRes"
+        400:
+          description: Bad Request / Staff data does not exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+  /api/v1/admin/order/{order_id}:
+    get:
+      security:
+        - JWTAuth: []
+      tags:
+        - Admin
+      summary: Get a single Order by ID with admin previledges
+      description: Endpoint to return an Order
+      parameters:
+        - in: path
+          name: order_id
+          schema:
+            type: string
+          required: true
+          description: Order ID
+      responses:
+        200:
+          description: Successfully fetched  Orders
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderObject"
+        400:
+          description: Bad Request / Order does not exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized / Customer is not verified
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        402:
+          description: Payment Required / Customer has insufficient balance
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentRequiredError402"
+        403:
+          description: Forbidden / Customer is not verified
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ForbiddenError403"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+  /api/v1/admin/orders:
+    get:
+      security:
+        - JWTAuth: []
+      tags:
+        - Admin
+      summary: Get all Orders with admin previledges
+      description: Endpoint to return all Orders
+      responses:
+        200:
+          description: Successfully fetched all Orders
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderObject"
+        400:
+          description: Bad Request / Order does not exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized / Customer is not verified
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        402:
+          description: Payment Required / Customer has insufficient balance
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentRequiredError402"
+        403:
+          description: Forbidden / Customer is not verified
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ForbiddenError403"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+  /api/v1/admin/task/{id}:
+    post:
+      security:
+        - JWTAuth: []
+      tags:
+        - Admin
+      summary: assign an order to a tasker
+      description: Endpoint to assign a task
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: order ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tasker:
+                  type: string
+                  description: tasker ID
+                  example: 5f9b2b3b9d2b3c2b3b9d2b3c
+      responses:
+        201:
+          description: Successfully assigned task
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/200TaskRegisterObject"
+        400:
+          description: Bad Request / Task record was not created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError404"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+    get:
+      security:
+        - JWTAuth: []
+      tags:
+        - Admin
+      summary: Get a single Task by ID
+      description: Endpoint to return a Task
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: Task ID
+      responses:
+        200:
+          description: Successfully fetched  Task
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TaskObject"
+        400:
+          description: Bad Request / Task does not exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized / Staff is not verified
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        402:
+          description: Payment Required / Staff has insufficient balance
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentRequiredError402"
+        403:
+          description: Forbidden / Staff is not verified
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ForbiddenError403"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+  /api/v1/admin/tasks/:
+    get:
+      security:
+        - JWTAuth: []
+      tags:
+        - Admin
+      summary: Get all Tasks
+      description: Endpoint to return all Tasks
+      responses:
+        200:
+          description: Successfully fetched all Tasks
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/200TaskRegisterObject"
+        400:
+          description: Bad Request / Task does not exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized / Staff is not verified
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        402:
+          description: Payment Required / Staff has insufficient balance
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentRequiredError402"
+        403:
+          description: Forbidden / Staff is not verified
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ForbiddenError403"
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError404"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+  /api/v1/order/{cart_id}:
+    post:
+      deprecated: true
+      security:
+        - JWTAuth: []
+      tags:
+        - Order
+      summary: Create a new Order
+      description: Endpoint to create a new Order
+      parameters:
+        - in: path
+          name: cart_id
+          schema:
+            type: string
+          required: true
+          description: Cart ID
+      responses:
+        201:
+          description: Successfully created a new Order
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderObject"
+        400:
+          description: Bad Request / Cart does not exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized / Customer is not verified
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        402:
+          description: Payment Required / Customer has insufficient balance
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentRequiredError402"
+        403:
+          description: Forbidden / Customer is not verified
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ForbiddenError403"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+    get:
+      security:
+        - JWTAuth: []
+      tags:
+        - Order
+      summary: Get a single Orders
+      description: Endpoint to return an Order
+      parameters:
+        - in: path
+          name: order_id
+          schema:
+            type: string
+          required: true
+          description: Order ID
+      responses:
+        200:
+          description: Successfully fetched  Orders
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderObject"
+        400:
+          description: Bad Request / Order does not exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized / Customer is not verified
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        402:
+          description: Payment Required / Customer has insufficient balance
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentRequiredError402"
+        403:
+          description: Forbidden / Customer is not verified
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ForbiddenError403"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+  /api/v1/orders:
+    get:
+      security:
+        - JWTAuth: []
+      tags:
+        - Order
+      summary: Get all Orders
+      description: Endpoint to return all Orders
+      responses:
+        200:
+          description: Successfully fetched all Orders
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderObject"
+        400:
+          description: Bad Request / Order does not exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized / Customer is not verified
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        402:
+          description: Payment Required / Customer has insufficient balance
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentRequiredError402"
+        403:
+          description: Forbidden / Customer is not verified
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ForbiddenError403"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+  /api/v1/payment_link/{cart_id}:
+    post:
+      security:
+        - JWTAuth: []
+      tags:
+        - Payment Link
+      summary: Create a new Payment Link
+      description: Endpoint to create a new Payment Link
+      parameters:
+        - in: path
+          name: cart_id
+          schema:
+            type: string
+          required: true
+          description: Cart ID
+      responses:
+        201:
+          description: Successfully created a new Payment Link
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentLinkRes"
+        400:
+          description: Bad Request / Cart does not exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized / Customer is not verified
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        402:
+          description: Payment Required / Customer has insufficient balance
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentRequiredError402"
+        403:
+          description: Forbidden / Customer is not verified
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ForbiddenError403"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+  /api/v1/service/:
+    post:
+      security:
+        - JWTAuth: []
+      tags:
+        - Service
+      summary: Create New Service
+      description: Endpoint to create new Service
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                upload:
+                  type: string
+                  format: binary
+                  description: File to be uploaded must be a valid image
+                service_name:
+                  type: string
+                  description: Service name
+                description:
+                  type: string
+                  description: Service description
+                active:
+                  type: boolean
+                  description: Service status
+
+      responses:
+        201:
+          description: Successfully created new Service
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/200ServiceObject"
+        400:
+          description: Bad Request / Service data does not exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+
+    get:
+      tags:
+        - Service
+      summary: Get all Services
+      description: Endpoint to get all Services
+      responses:
+        200:
+          description: Successfully fetched all Services
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/200ServiceObject"
+        400:
+          description: Bad Request / Service data does not exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+  /api/v1/service/{id}:
+    get:
+      tags:
+        - Service
+      summary: Get Services by id
+      description: Endpoint to get a single Services
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+      responses:
+        200:
+          description: Successfully fetched all Services
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/200ServiceObject"
+        400:
+          description: Bad Request / Service data does not exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+    patch:
+      security:
+        - JWTAuth: []
+      tags:
+        - Service
+      summary: Update Service
+      description: Endpoint to update Service
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: Service ID
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                upload:
+                  type: string
+                  format: binary
+                  description: File to be uploaded must be a valid image
+                service_name:
+                  type: string
+                  description: Service name
+                description:
+                  type: string
+                  description: Service description
+                active:
+                  type: boolean
+                  description: Service status
+
+      responses:
+        200:
+          description: Successfully updated Service
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/200ServiceObject"
+        400:
+          description: Bad Request / Service data does not exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+    delete:
+      security:
+        - JWTAuth: []
+      tags:
+        - Service
+      summary: Delete Service
+      description: Endpoint to delete Service, only available for admin user, this will delete all related data with this Service cannot be undone
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: Service ID
+      responses:
+        200:
+          description: Successfully deleted Service
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: int
+                    example: 200
+                  message:
+                    type: string
+                    example: Successfully deleted Service
+        400:
+          description: Bad Request / Service data does not exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+  /api/v1/service/subservice:
+    post:
+      security:
+        - JWTAuth: []
+      tags:
+        - SubService
+      summary: Create New SubService
+      description: Endpoint to create new SubService
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                upload:
+                  type: string
+                  format: binary
+                  description: File to be uploaded must be a valid image
+                sub_service_name:
+                  type: string
+                  description: SubService name
+                description:
+                  type: string
+                  description: SubService description
+                active:
+                  type: boolean
+                  description: SubService active status
+                service:
+                  type: string
+                  description: Service ID
+      responses:
+        201:
+          description: Successfully created new SubService
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/200SubServiceObject"
+        400:
+          description: Bad Request / SubService record was not created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+
+    get:
+      tags:
+        - SubService
+      summary: Get all SubServices
+      description: Endpoint to get all SubServices
+      responses:
+        200:
+          description: Successfully fetched all SubServices
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/200SubServiceObject"
+        400:
+          description: Bad Request / Service data does not exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+  /api/v1/service/subservice/{id}:
+    get:
+      tags:
+        - SubService
+      summary: Get SubServices by id
+      description: Endpoint to get a single SubServices
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: sunservice ID
+      responses:
+        200:
+          description: Successfully fetched all SubServices
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/200SubServiceObject"
+        400:
+          description: Bad Request / Service data does not exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+    patch:
+      security:
+        - JWTAuth: []
+      tags:
+        - SubService
+      summary: Update SubService
+      description: Endpoint to update SubService
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: SubService ID
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                upload:
+                  type: string
+                  format: binary
+                  description: File to be uploaded must be a valid image
+                sub_service_name:
+                  type: string
+                  description: SubService name
+                description:
+                  type: string
+                  description: Service description
+                active:
+                  type: boolean
+                  description: Service status
+      responses:
+        200:
+          description: Successfully updated SubService
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceObject"
+        400:
+          description: Bad Request / Service data does not exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+    delete:
+      security:
+        - JWTAuth: []
+      tags:
+        - SubService
+      summary: Delete SebService
+      description: Endpoint to delete SebService, this will also delete all the related data in the database, cannot be undone
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: SubService ID
+      responses:
+        200:
+          description: Successfully deleted SebService
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: int
+                    example: 200
+                  message:
+                    type: string
+                    example: Successfully deleted SebService
+        400:
+          description: Bad Request / Service data does not exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+  /api/v1/service/subservice/pricetier/:
+    post:
+      security:
+        - JWTAuth: []
+      tags:
+        - PriceTier
+      summary: Create New PriceTier
+      description: Endpoint to create new PriceTier
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PricetierObject"
+      responses:
+        201:
+          description: Successfully created new PriceTier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/200PricetierObject"
+        400:
+          description: Bad Request / PriceTier record was not created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+
+    get:
+      tags:
+        - PriceTier
+      summary: Get all PriceTier
+      description: Endpoint to get all PriceTier
+      responses:
+        200:
+          description: Successfully fetched all PriceTier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PricetierObject"
+        400:
+          description: Bad Request / Service data does not exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+  /api/v1/service/subservice/pricetier/{id}:
+    get:
+      tags:
+        - PriceTier
+      summary: Get PriceTier by id
+      description: Endpoint to get a single PriceTier
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: PriceTier ID
+      responses:
+        200:
+          description: Successfully fetched all PriceTier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PricetierObject"
+        400:
+          description: Bad Request / Service data does not exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+    patch:
+      security:
+        - JWTAuth: []
+      tags:
+        - PriceTier
+      summary: Update PriceTier
+      description: Endpoint to update PriceTier
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: PriceTier ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PricetierObject"
+      responses:
+        200:
+          description: Successfully updated PriceTier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/200PricetierObject"
+        400:
+          description: Bad Request / Service data does not exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+    delete:
+      security:
+        - JWTAuth: []
+      tags:
+        - PriceTier
+      summary: Delete PriceTier
+      description: Endpoint to delete PriceTier by id, this will also delete all the PriceTier's associated with the PriceTier
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: PriceTier ID
+      responses:
+        200:
+          description: Successfully deleted PriceTier
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: int
+                    example: 200
+                  message:
+                    type: string
+                    example: Successfully deleted PriceTier
+        400:
+          description: Bad Request / Service data does not exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+
+  /api/v1/team_members/:
+    post:
+      tags:
+        - TeamMember
+      summary: add a new team member
+      description: Endpoint to add a new team member details
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TeamRegisterObject"
+      responses:
+        201:
+          description: Successfully registered team
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/200TeamRegisterObject"
+        400:
+          description: Bad Request / Team record was not created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+    get:
+      tags:
+        - TeamMember
+      summary: Get all team members
+      description: Endpoint to get all team members
+      responses:
+        200:
+          description: Successfully fetched all team members
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TeamRegisterObject"
+        400:
+          description: Bad Request / Team record was not created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+  /api/v1/team_members/{id}:
+    get:
+      tags:
+        - TeamMember
+      summary: Get team member by id
+      description: Endpoint to get a single team member
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: team member ID
+      responses:
+        200:
+          description: Successfully fetched team member
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TeamRegisterObject"
+        400:
+          description: Bad Request / Team record was not created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+    patch:
+      tags:
+        - TeamMember
+      summary: Update team member
+      description: Endpoint to update team member
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: team member ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TeamRegisterObject"
+      responses:
+        200:
+          description: Successfully updated team member
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/200TeamRegisterObject"
+        400:
+          description: Bad Request / Team record was not created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+    delete:
+      tags:
+        - TeamMember
+      summary: Delete team member
+      description: Endpoint to delete team member by id, this will also delete all the team member's associated with the team member
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: team member ID
+      responses:
+        200:
+          description: Successfully deleted team member
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: int
+                    example: 200
+                  message:
+                    type: string
+                    example: Successfully deleted team member
+        400:
+          description: Bad Request / Service data does not exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+  /api/v1/policies/:
+    post:
+      tags:
+        - Policy
+      summary: add a new policy
+      description: Endpoint to add a new policy details
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PolicyRegisterObject"
+      responses:
+        201:
+          description: Successfully registered policy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/200PolicyRegisterObject"
+        400:
+          description: Bad Request / Policy record was not created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+    get:
+      tags:
+        - Policy
+      summary: Get all policies
+      description: Endpoint to get all policies
+      responses:
+        200:
+          description: Successfully fetched all policies
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PolicyRegisterObject"
+        400:
+          description: Bad Request / Policy record was not created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+
+  /api/v1/policies/{id}:
+    get:
+      tags:
+        - Policy
+      summary: Get policy by id
+      description: Endpoint to get a single policy
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: policy ID
+      responses:
+        200:
+          description: Successfully fetched policy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PolicyRegisterObject"
+        400:
+          description: Bad Request / Policy record was not created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+    patch:
+      tags:
+        - Policy
+      summary: Update policy
+      description: Endpoint to update policy
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: policy ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PolicyRegisterObject"
+      responses:
+        200:
+          description: Successfully updated policy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/200PolicyRegisterObject"
+        400:
+          description: Bad Request / Policy record was not created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+    delete:
+      tags:
+        - Policy
+      summary: Delete policy
+      description: Endpoint to delete policy by id, this will also delete all the policy's associated with the policy
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: policy ID
+      responses:
+        200:
+          description: Successfully deleted policy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/200PolicyRegisterObject"
+        400:
+          description: Bad Request / Policy record was not created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+  /api/v1/about_us/:
+    post:
+      security:
+        - JWTAuth: []
+      tags:
+        - About-Us
+      summary: add a new about us data
+      description: Endpoint to add a new about us data
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                upload:
+                  type: string
+                  format: binary
+                  description: File to be uploaded must be a valid image
+                header:
+                  type: string
+                  description: Content of the about us data
+                content:
+                  type: string
+                  description: Content of the about us data
+      responses:
+        201:
+          description: Successfully added new about us data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/200AboutUsObject"
+        400:
+          description: Bad Request / about us data was not created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+    get:
+      tags:
+        - About-Us
+      summary: Get all about us data
+      description: Endpoint to get all about us data
+      responses:
+        200:
+          description: Successfully fetched all about us data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/200AboutUsObject"
+        400:
+          description: Bad Request / about us data was not created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+  /api/v1/about_us/{id}:
+    get:
+      tags:
+        - About-Us
+      summary: Get about us data by id
+      description: Endpoint to get a single about us data
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: about us data ID
+      responses:
+        200:
+          description: Successfully fetched about us data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/200AboutUsObject"
+        400:
+          description: Bad Request / about us data was not created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+    patch:
+      security:
+        - JWTAuth: []
+      tags:
+        - About-Us
+      summary: Update about us data
+      description: Endpoint to update about us data
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: about us data ID
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                upload:
+                  type: string
+                  format: binary
+                  description: File to be uploaded must be a valid image
+                header:
+                  type: string
+                  description: Content of the about us data
+                content:
+                  type: string
+                  description: Content of the about us data
+      responses:
+        200:
+          description: Successfully updated about us data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/200AboutUsObject"
+        400:
+          description: Bad Request / about us data was not created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+    delete:
+      security:
+        - JWTAuth: []
+      tags:
+        - About-Us
+      summary: Delete about us data
+      description: Endpoint to delete about us data
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: about us data ID
+      responses:
+        200:
+          description: Successfully deleted about us data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/200AboutUsObject"
+        400:
+          description: Bad Request / about us data was not created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+  /api/v1/careers/:
+    post:
+      tags:
+        - Career
+      summary: add a new Career Position
+      description: Endpoint to add a new job posting
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CareerObject"
+      responses:
+        201:
+          description: Successfully added new job posting
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/200CareercreationObject"
+        400:
+          description: Bad Request / Job posting was not created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+    get:
+      tags:
+        - Career
+      summary: Get all job postings
+      description: Endpoint to get all careers job postings
+      responses:
+        200:
+          description: Successfully fetched all job postings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CareerObject"
+        400:
+          description: Bad Request / job posting record was not created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+
+  /api/v1/careers/{id}:
+    get:
+      tags:
+        - Career
+      summary: Get Career job by id
+      description: Endpoint to get a single Career job
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: Career ID
+      responses:
+        200:
+          description: Successfully fetched career job
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CareerObject"
+        400:
+          description: Bad Request / Job posting record was not created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+    patch:
+      tags:
+        - Career
+      summary: Update career
+      description: Endpoint to update career
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: career ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CareerObject"
+      responses:
+        200:
+          description: Successfully updated job posting
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/200CareercreationObject"
+        400:
+          description: Bad Request / career job record was not created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+    delete:
+      tags:
+        - Career
+      summary: Delete career
+      description: Endpoint to delete job by id, this will also delete all the job's associated
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: career ID
+      responses:
+        200:
+          description: Successfully deleted job posting
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/200CareercreationObject"
+        400:
+          description: Bad Request / Job posting record was not created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+  /api/v1/blogs/:
+    post:
+      tags:
+        - Blog
+      summary: add a new blog post
+      description: Endpoint to add a new blog post
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                upload:
+                  type: string
+                  format: binary
+                  description: File to be uploaded must be a valid image
+                title:
+                  type: string
+                  description: Blog title
+                content:
+                  type: string
+                  description: Blog content
+                author:
+                  type: string
+                  description: Blog author
+                category:
+                  type: string
+                  description: Blog category
+                active:
+                  type: boolean
+                  description: Blog active
+      responses:
+        201:
+          description: Successfully added new blog post
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/200BlogcreationObject"
+        400:
+          description: Bad Request / blog post was not created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+    get:
+      tags:
+        - Blog
+      summary: Get all blog postings
+      description: Endpoint to get all blog postings
+      responses:
+        200:
+          description: Successfully fetched all blog postings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BlogObject"
+        400:
+          description: Bad Request / blog posting record was not created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+  /api/v1/contacts/:
+    post:
+      tags:
+        - Contact-Us
+      summary: add a new Contact information
+      description: Endpoint to add a new contact infomation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContactObject"
+      responses:
+        201:
+          description: Successfully added new contact information
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/200ContactcreationObject"
+        400:
+          description: Bad Request / contact information was not created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+    get:
+      tags:
+        - Contact-Us
+      summary: Get all contacts information
+      description: Endpoint to get all contacts information
+      responses:
+        200:
+          description: Successfully fetched all contacts information
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContactObject"
+        400:
+          description: Bad Request / contact information record was not created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+
+  /api/v1/contacts/{id}:
+    get:
+      tags:
+        - Contact-Us
+      summary: Get Contact information by id
+      description: Endpoint to get a single contact information by id
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: Contact ID
+      responses:
+        200:
+          description: Successfully fetched contact information
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContactObject"
+        400:
+          description: Bad Request / contact information record was not created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+    patch:
+      tags:
+        - Contact-Us
+      summary: Update contact information
+      description: Endpoint to update contact information
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: contact ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContactObject"
+      responses:
+        200:
+          description: Successfully updated contact information
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/200ContactcreationObject"
+        400:
+          description: Bad Request / contact information record was not created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+    delete:
+      tags:
+        - Contact-Us
+      summary: Delete Contact information
+      description: Endpoint to delete Contact information by id
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: contact ID
+      responses:
+        200:
+          description: Successfully deleted contact information
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/200ContactcreationObject"
+        400:
+          description: Bad Request / contact information record was not created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+  /api/v1/blogs/{id}:
+    get:
+      tags:
+        - Blog
+      summary: Get blog by id
+      description: Endpoint to get a single blog posting
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: Blog ID
+      responses:
+        200:
+          description: Successfully fetched blog posting
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BlogObject"
+        400:
+          description: Bad Request / blog posting record was not created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+    patch:
+      tags:
+        - Blog
+      summary: Update blog posting
+      description: Endpoint to update blog posting
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: blog ID
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                upload:
+                  type: string
+                  format: binary
+                  description: File to be uploaded must be a valid image
+                title:
+                  type: string
+                  description: Blog title
+                content:
+                  type: string
+                  description: Blog content
+                author:
+                  type: string
+                  description: Blog author
+                category:
+                  type: string
+                  description: Blog category
+                active:
+                  type: boolean
+                  description: Blog active
+      responses:
+        200:
+          description: Successfully updated blog posting
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/200BlogcreationObject"
+        400:
+          description: Bad Request / blog post record was not created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+    delete:
+      tags:
+        - Blog
+      summary: Delete blog posting
+      description: Endpoint to delete blog by id, this will also delete all the blog's associated
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: blog ID
+      responses:
+        200:
+          description: Successfully deleted blog
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/200BlogcreationObject"
+        400:
+          description: Bad Request / blog posting record was not created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+  /api/v1/faqs/:
+    post:
+      tags:
+        - Faq
+      summary: add a new faq
+      description: Endpoint to add a new faq details
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FaqRegisterObject"
+      responses:
+        201:
+          description: Successfully registered faq
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/200FaqRegisterObject"
+        400:
+          description: Bad Request / Faq record was not created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+    get:
+      tags:
+        - Faq
+      summary: Get all faqs
+      description: Endpoint to get all faqs
+      responses:
+        200:
+          description: Successfully fetched all faqs
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FaqRegisterObject"
+        400:
+          description: Bad Request / Faq record was not created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+  /api/v1/faqs/{id}:
+    get:
+      tags:
+        - Faq
+      summary: Get faq by id
+      description: Endpoint to get a single faq
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: faq ID
+      responses:
+        200:
+          description: Successfully fetched faq
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FaqRegisterObject"
+        400:
+          description: Bad Request / Faq record was not created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+    patch:
+      tags:
+        - Faq
+      summary: Update faq
+      description: Endpoint to update faq
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: faq ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FaqRegisterObject"
+      responses:
+        200:
+          description: Successfully updated faq
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/200FaqRegisterObject"
+        400:
+          description: Bad Request / Faq record was not created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+    delete:
+      tags:
+        - Faq
+      summary: Delete faq
+      description: Endpoint to delete faq by id, this will also delete all the faq's associated with the fa
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: faq ID
+      responses:
+        200:
+          description: Successfully deleted faq
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/200FaqRegisterObject"
+        400:
+          description: Bad Request / Faq record was not created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+  /api/v1/task/{id}:
+    get:
+      security:
+        - JWTAuth: []
+      tags:
+        - Task
+      summary: get a single task
+      description: Endpoint to get a task
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: task ID
+      responses:
+        200:
+          description: Successfully returned task
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/200TaskRegisterObject"
+        400:
+          description: Bad Request / Task record was not created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError404"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+  /api/v1/tasks:
+    get:
+      security:
+        - JWTAuth: []
+      tags:
+        - Task
+      summary: get all task for a tasker
+      description: Endpoint to return all tasker tasks
+      responses:
+        200:
+          description: Successfully returned task
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/200TaskRegisterObject"
+        400:
+          description: Bad Request / Task record was not created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError404"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+  /api/v1/task/accept_reject/{id}/:
+    patch:
+      security:
+        - JWTAuth: []
+      tags:
+        - Task
+      summary: accept or reject a task
+      description: Endpoint to accept or reject a task
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: task ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                action:
+                  type: string
+                  example: "accept"
+                  description: is the tasker accepting or rejecting the task
+      responses:
+        200:
+          description: action performed Successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/200TaskRegisterObject"
+        400:
+          description: Bad Request / Task record was not created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError404"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+  /api/v1/task/cancel_inprogress_complete/{id}/:
+    patch:
+      security:
+        - JWTAuth: []
+      tags:
+        - Task
+      summary: cancel or inprogress or complete a task
+      description: Endpoint to cancel, inprogress or complete a task
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: task ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                action:
+                  type: string
+                  example: "accept"
+                  description: is the tasker accepting or rejecting the task
+                code:
+                  type: string
+                  example: "1321"
+                  description: this is the code provided to the tasker by the customer 
+      responses:
+        200:
+          description: action performed successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/200TaskRegisterObject"
+        400:
+          description: Bad Request / Task record was not created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError404"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"              
+  /api/v1/cart/:
+    post:
+      security:
+        - JWTAuth: []
+      tags:
+        - Cart
+      summary: add a new cart
+      description: Endpoint to add a new cart
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CartRegisterObject"
+      responses:
+        201:
+          description: Successfully registered cart
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/200CartRegisterObject"
+        400:
+          description: Bad Request / Cart record was not created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError404"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+    get:
+      security:
+        - JWTAuth: []
+      tags:
+        - Cart
+      summary: Get a customer active cart
+      description: Endpoint to get the customer active cart
+      responses:
+        200:
+          description: Successfully fetched customer active cart
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CartRegisterObject"
+        400:
+          description: Bad Request / Cart record was not created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError404"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+    patch:
+      security:
+        - JWTAuth: []
+      tags:
+        - Cart
+      summary: Update customer active cart
+      description: Endpoint to update customer active cart
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                  example: "e01e69ac-7385-47eb-8b88-0a277c016503"
+                  description: packageDetails id
+                service_name:
+                  type: string
+                  example: "e01e69ac-7385-47eb-8b88-0a277c016503"
+                  description: packageDetails id
+                packageDetails:
+                  type: array
+                  example:
+                    [
+                      {
+                        "title": "6120f3b3f0b4a5f9c8c5b3b1",
+                        "quantity": 2,
+                        "unitCost": 200,
+                      },
+                    ]
+
+      responses:
+        200:
+          description: Successfully updated cart
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/200CartRegisterObject"
+        400:
+          description: Bad Request / Cart record was not created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError404"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+  /api/v1/cart/{id}:
+    delete:
+      security:
+        - JWTAuth: []
+      tags:
+        - Cart
+      summary: Delete customer active cart
+      description: Endpoint to delete customer active cart by id, this will also delete all the cart's associated with the cart
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: cart ID
+      responses:
+        200:
+          description: Successfully deleted cart
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/200CartRegisterObject"
+        400:
+          description: Bad Request / Cart record was not created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError404"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+
+  /api/v1/rt/:
+    post:
+      tags:
+        - RT
+      summary: add a new review/testimony
+      description: Endpoint to add a new review testimony
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/rtRegisterObject"
+      responses:
+        201:
+          description: Successfully added rt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/200rtRegisterObject"
+        400:
+          description: Bad Request / rt record was not created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+    get:
+      tags:
+        - RT
+      summary: Get all reviews/testimonies
+      description: Endpoint to get all rts
+      responses:
+        200:
+          description: Successfully fetched all rts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FaqRegisterObject"
+        400:
+          description: Bad Request / rt record was not returned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+  /api/v1/rt/{id}:
+    get:
+      tags:
+        - RT
+      summary: Get rt by id
+      description: Endpoint to get a single rt
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: rt ID
+      responses:
+        200:
+          description: Successfully fetched rt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/rtRegisterObject"
+        400:
+          description: Bad Request / rt record was not returned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+    patch:
+      tags:
+        - RT
+      summary: Update faq
+      description: Endpoint to update rt
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: rt ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FaqRegisterObject"
+      responses:
+        200:
+          description: Successfully updated rt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/200rtRegisterObject"
+        400:
+          description: Bad Request / rt record was not updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+    delete:
+      tags:
+        - RT
+      summary: Delete rt
+      description: Endpoint to delete rt by id
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: rt ID
+      responses:
+        200:
+          description: Successfully deleted rt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/200rtRegisterObject"
+        400:
+          description: Bad Request / rt record was not deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError401"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
+
+components:
+  securitySchemes:
+    JWTAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    BlogObject:
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            properties:
+              upload:
+                type: string
+                format: binary
+                description: File to be uploaded must be a valid image
+              title:
+                type: string
+                example: "How to use the app"
+              content:
+                type: string
+                example: "This is how to use the app"
+              image:
+                type: string
+                example: "https://res.cloudinary.com/djxhcwowp/image/upload/v1628589853/tech-blog/1628589852449-1628589852449.jpg"
+              author:
+                type: string
+                example: "Jeff"
+    CartRegisterObject:
+      type: array
+      items:
+        types: object
+        properties:
+          pricetierid:
+            type: string
+            example: "ba23ffae-d7eb-4cf9-bd30-e1c42768891a"
+          service_name:
+            type: string
+            example: "Service name"
+          packageDetails:
+            type: array
+            example:
+              [
+                {
+                  "title": "6120f3b3f0b4a5f9c8c5b3b1",
+                  "quantity": 2,
+                  unitCost: 200,
+                },
+              ]
+    200TaskRegisterObject:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "Task assigned successfully"
+        data:
+          type: object
+          properties:
+            _id:
+              type: string
+              example: "6120f3b3f0b4a5f9c8c5b3b1"
+            status:
+              type: string
+              example: "Pending"
+            tasker:
+              type: object
+              example: "624c913a28b71adcc6012a08"
+            order:
+              type: string
+              example: "624c913a28b71adcc6012a08"
+            
+    200CartRegisterObject:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 201
+        message:
+          type: string
+          example: "Cart created successfully"
+        data:
+          type: object
+          properties:
+            _id:
+              type: string
+              example: "6120f3b3f0b4a5f9c8c5b3b1"
+            customer:
+              type: string
+              example: "624c913a28b71adcc6012a08"
+            line_items:
+              type: array
+              example:
+                [
+                  {
+                    "_id": "6120f3b3f0b4a5f9c8c5b3b1",
+                    "pricetier": "",
+                    "quantity": 2,
+                  },
+                ]
+            total_price:
+              type: integer
+              example: 200
+            total_items:
+              type: integer
+              example: 2
+    ResourceNotFoundError404:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 404
+        message:
+          type: string
+          example: "Resource not found"
+    ContactObject:
+      type: object
+      properties:
+        first_name:
+          type: string
+          example: "Jeff"
+        last_name:
+          type: string
+          example: "Jeff"
+        email:
+          type: string
+          example: "a@a.com"
+        phone_number:
+          type: string
+          example: "08012345678"
+        message:
+          type: string
+          example: "This is a message"
+    200BlogcreationObject:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "Blog created successfully"
+        data:
+          type: object
+          properties:
+            blog:
+              type: object
+              properties:
+                _id:
+                  type: string
+                  example: "6120f3b3f0b4a5f9c8c5b3b1"
+                title:
+                  type: string
+                  example: "How to use the app"
+                content:
+                  type: string
+                  example: "This is how to use the app"
+                author:
+                  type: string
+                  example: "Jeff"
+                image:
+                  type: string
+                  example: "https://res.cloudinary.com/djxhcwowp/image/upload/v1628589853/tech-blog/1628589852449-1628589852449.jpg"
+                category:
+                  type: string
+                  example: "How to use the app"
+                active:
+                  type: boolean
+                  example: true
+    StaffLogoutAllRes:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "Successfully logged out all staff"
+    StaffLogoutRes:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "Successfully logged out staff"
+    200AboutUsObject:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "About us fetched successfully"
+        data:
+          type: object
+          properties:
+            about:
+              type: object
+              properties:
+                _id:
+                  type: string
+                  example: "6120f3b3f0b4a5f9c8c5b3b1"
+                title:
+                  type: string
+                  example: "About us"
+                content:
+                  type: string
+                  example: "This is about us"
+                image:
+                  type: string
+                  example: "https://res.cloudinary.com/djxhcwowp/image/upload/v1628589853/tech-blog/1628589852449-1628589852449.jpg"
+
+    CustomerLogoutAllRes:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "Successfully logged out all customers"
+    CustomerLogoutRes:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "Successfully logged out customer"
+    CareerObject:
+      type: object
+      properties:
+        position:
+          type: string
+          example: "Software Engineer"
+        location:
+          type: string
+          example: "Lagos"
+        description:
+          type: string
+          example: "We are looking for a software engineer to join our team"
+        status:
+          type: string
+          example: "Open"
+        link:
+          type: string
+          example: "https://www.google.com"
+        requirements:
+          type: string
+          example: "BSc in Computer Science or related field"
+    200CareercreationObject:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "Career created successfully"
+        result:
+          type: object
+          example:
+            _id: 624c913a28b71adcc6012a08
+            position: Software Engineer
+            location: Lagos
+            description: We are looking for a software engineer to join our team
+            status: Open
+            link: https://www.google.com
+            requirements: BSc in Computer Science or related field
+    rtRegisterObject:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "John Doe"
+        statement:
+          type: string
+          example: "I love this company"
+    200rtRegisterObject:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "rt added successfully"
+        result:
+          type: object
+          example:
+            _id: 624c913a28b71adcc6012a08
+            name: John Doe
+            statement: I love this company
+    200FaqRegisterObject:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "Faq added successfully"
+        result:
+          type: object
+          example:
+            _id: 624c913a28b71adcc6012a08
+            question: What is the company's policy on sexual harassment?
+            answer: The company has a zero tolerance policy on sexual harassment
+    FaqRegisterObject:
+      type: object
+      properties:
+        question:
+          type: string
+          example: "What is the company's policy on sexual harassment?"
+        answer:
+          type: string
+          example: "The company has a zero tolerance policy on sexual harassment"
+        active:
+          type: boolean
+          example: true
+        category:
+          type: string
+          example: "Harassment"
+    200PolicyRegisterObject:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "Policy added successfully"
+        result:
+          type: object
+          example:
+            _id: 624c913a28b71adcc6012a08
+            policy_name: Personal Conduct Policy
+            policy_description: This policy is to ensure that all employees conduct themselves in a professional manner
+    PolicyRegisterObject:
+      type: object
+      properties:
+        policy_name:
+          type: string
+          example: "Personal Conduct Policy"
+        policy_description:
+          type: string
+          example: "This policy is to ensure that all employees conduct themselves in a professional manner"
+
+    TeamRegisterObject:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "Van Dijk"
+        position:
+          type: string
+          example: "CEO"
+        message:
+          type: string
+          example: "My name is Van and i am the CEO of this company"
+    200TeamRegisterObject:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "Team member added successfully"
+        result:
+          type: object
+          example:
+            _id: 624c913a28b71adcc6012a08
+            name: Van Dijk
+            position: CEO
+            message: My name is Van and i am the CEO of this company
+            __v: 0
+    CustomerObject:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "Customer profile returned Successfully"
+        result:
+          type: object
+          example:
+            _id: 624c913a28b71adcc6012a08
+            name: Opoku Wari General Customer
+            license: GH-AD121AWRE
+            email: inf@opokuwari.org
+            phone: "+23322322233"
+            country: Ghana
+            address: Opoku warri way accra
+            verify_email: true
+            verify_phone: true
+            __v: 0
+          token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MjUxOGQ0MjcyZmU
+    ServiceObject:
+      type: object
+      properties:
+        service_name:
+          type: string
+          example: "General Washing"
+        description:
+          type: string
+          example: "Service the deal will all things washing"
+        active:
+          type: boolean
+          example: true
+    PricetierObject:
+      type: object
+      properties:
+        tier_name:
+          type: string
+          example: "1 Room"
+        description:
+          type: string
+          example: "Price tier for kitchen washing"
+        price:
+          type: number
+          example: 100
+        active:
+          type: boolean
+          example: true
+        cost_parameters:
+          type: array
+          items:
+            type: string
+            example: "Wash and Iron"
+            price: 100
+        subservice:
+          type: string
+          example: "624c913a28b71adcc6012a08"
+    200PricetierObject:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        description:
+          type: string
+          example: "return successfully"
+        result:
+          type: object
+          example:
+            _id: 624c913a28b71adcc6012a08
+            tier_name: 1 Room
+            description: Price tier for kitchen washing
+            price: 100
+            active: true
+            subservice_id: 624c913a28b71adcc6012a08
+            __v: 0
+    SubServiceObject:
+      type: object
+      properties:
+        sub_service_name:
+          type: string
+          example: "Kitchen Washing"
+        description:
+          type: string
+          example: "Service the deal with kitchen washing"
+        active:
+          type: boolean
+          example: true
+        service_id:
+          type: string
+          example: "624c913a28b71adcc6012a08"
+    200SubServiceObject:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        description:
+          type: string
+          example: "return successfully"
+        result:
+          type: object
+          example:
+            _id: 624c913a28b71adcc6012a08
+            sub_service_name: Kitchen Washing
+            description: Service the deal with kitchen washing
+            active: true
+            service_id: 624c913a28b71adcc6012a08
+            __v: 0
+    200ServiceObject:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        description:
+          type: string
+          example: "return successfully"
+        result:
+          type: object
+          example:
+            _id: 624c913a28b71adcc6012a08
+            service_name: General Washing
+            description: Service the deal will all things washing
+            active: true
+            __v: 0
+
+    StaffObject:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "Staff profile returned Successfully"
+        result:
+          type: object
+          example:
+            _id: 624c913a28b71adcc6012a08
+            first_name: John
+            last_name: Doe
+            license: GH-AD121AWRE
+            email: inf@opokuwari.org
+            phone: "+23322322233"
+            country: Ghana
+            address: Opoku warri way accra
+            verify_email: true
+            verify_phone: true
+            __v: 0
+          token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MjUxOGQ0MjcyZmU
+
+    UpdateCustomerReq:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Opoku Warri
+        license:
+          type: string
+          example: GH-AD121AWRE/UPDATED
+        country:
+          type: string
+          example: Ghana
+        city:
+          type: string
+          example: Accra
+        town:
+          type: string
+          example: New Town
+        address:
+          type: string
+          example: 17 Makwa street NT
+
+    UpdateStaffRole:
+      type: object
+      properties:
+        roles:
+          type: array
+          example: ["ADMIN"]
+        staff_id:
+          type: string
+          example: 624c913a28b71adcc6012a08
+    UpdateStaffReq:
+      type: object
+      properties:
+        first_name:
+          type: string
+          example: Johb
+        last_name:
+          type: string
+          example: Doe
+        address:
+          type: string
+          example: 17 Makwa street NT
+
+    UnauthorizedError401:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 401
+        error:
+          type: string
+          example: "Invalid authorization credentials"
+    InternalServerError500:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 500
+        error:
+          type: string
+          example: "Internal Server Error"
+
+    profile_image_Res:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "profile returned Successfully"
+        result:
+          type: object
+          example:
+            _id: 0232c913a28b71adcc6012a08
+            name: Opoku Warri
+            email: opokuwarri@test.com
+            phone: "+23322322233"
+            verify_email: true
+            verify_phone: true
+            country: Ghana
+            city: Accra
+            profile_image:
+              image_url: http://res.cloudinary.com/trimester-save-ltd/image/upload/v1659552893/gzrzhuvox7yjt9wt9hrs.jpg
+              asset_id: gzrzhuvox7yjt9wt9hrs
+              cloudinary_id: gzrzhuvox7yjt9wt9hrs
+            created_at: 2020-05-05
+            updated_at: 2020-05-05
+    UpdateCustomerRes:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "Customer profile returned Successfully"
+        result:
+          type: object
+          example:
+            _id: 0232c913a28b71adcc6012a08
+            name: Opoku Warri
+            email: opoluwarri@test.com
+            phone: "+23322322233"
+            verify_email: true
+            verify_phone: true
+            spouse_phone: "+23324343433"
+            country: Ghana
+            city: Accra
+    UpdateStaffRes:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "Staff profile returned Successfully"
+        result:
+          type: object
+          example:
+            _id: 0232c913a28b71adcc6012a08
+            name: John doe
+            email: johndoe@test.com
+            phone: "+23322322233"
+            verify_email: true
+            verify_phone: true
+            spouse_phone: "+23324343433"
+            role: ["ADMIN"]
+            country: Ghana
+            city: Accra
+    OrderObject:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: "6120f3b3f0b4a5f9c8c5b3b1"
+        status:
+          type: string
+          example: "Pending"
+        customer:
+          type: string
+          example: "624c913a28b71adcc6012a08"
+        payment:
+          type: string
+          example: "6120f3b3f0b4a5f9c8c5b3b1"
+
+    CustomerRegistrationReq:
+      type: object
+      properties:
+        first_name:
+          type: string
+          example: Johe
+        last_name:
+          type: string
+          example: Doe
+        phone:
+          type: string
+          example: "+1202323243444"
+        email:
+          type: string
+          example: john.doe@test.ca
+        address:
+          type: string
+          example: Flat 1, 17 Makwa street NT
+        city:
+          type: string
+          example: Ottawa
+        country:
+          type: string
+          example: Canada
+        password:
+          type: string
+          example: strongpassword
+    StaffRegistrationReq:
+      type: object
+      properties:
+        first_name:
+          type: string
+          example: Jane
+        last_name:
+          type: sting
+          example: Goe
+        phone:
+          type: string
+          example: "+233202323243444"
+        email:
+          type: string
+          example:
+        address:
+          type: string
+          example: Opoku wari road accra
+        roles:
+          type: array
+          example: ["ADMIN"]
+        type:
+          type: string
+          example: "STAFF"
+        password:
+          type: string
+          example: strongpassword
+
+    CustomerLoginReq:
+      type: object
+      properties:
+        email:
+          type: string
+          example: "john.doe@test.ca"
+        password:
+          type: string
+          example: strongpassword
+
+    StaffLoginReq:
+      type: object
+      properties:
+        email:
+          type: string
+          example: "joe@opokuwari.org"
+        password:
+          type: string
+          example: strongpassword
+
+    ForgotPasswordReq:
+      type: object
+      properties:
+        email:
+          type: string
+          example: jane@sample.com
+
+    ResetPasswordReq:
+      type: object
+      properties:
+        password:
+          type: string
+          example: strongpassword
+
+    ChangePasswordReq:
+      type: object
+      properties:
+        currentpassword:
+          type: string
+          example: strongpassword
+        newpassword:
+          type: string
+          example: strongpassword
+
+    ChangePasswordRes:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 201
+        message:
+          type: string
+          example: "Password changed successfully"
+
+    CustomerRegistrationRes:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 201
+        message:
+          type: string
+          example: Registration successful, verification token sent.
+    StaffRegistrationRes:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 201
+        message:
+          type: string
+          example: Registration successful, verification token sent.
+
+    CustomerLoginRes:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: Login successful
+        result:
+          type: object
+          example:
+            _id: 624c913a28b71adcc6012a08
+            name: Opoku Wari General Customer
+            license: GH-AD121AWRE
+            email: info@opokuwari.org
+            phone: "+2330232324667"
+            verify_phone: true
+            verify_email: true
+            _v: 3
+            resetlink:
+        token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MjUxOGQ0MjcyZmU
+
+    StaffLoginRes:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: Login successful
+        result:
+          type: object
+          example:
+            _id: 624c913a28b71adcc6012a08
+            name: Joe Doe
+            license: GH-AD121AWRE
+            email: info@opokuwari.org
+            phone: "+2330232324667"
+            verify_phone: true
+            verify_email: true
+            _v: 3
+            resetlink:
+        token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MjUxOGQ0MjcyZmU
+
+    EmailVerificationRes:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: Email verified successfully
+        result:
+          type: object
+          example:
+            _id: 62540b8d895679af5ce8fad4
+            userid: 624c913a28b71adcc6012a0b
+            emailverified: true
+            emailverificationcode": 07106118-6a86-480e-865c-d43725ab7d5e
+            __v: 0
+
+    PhoneVerificationRes:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: Phone verified successfully
+    ForgotPasswordRes:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 201
+        message:
+          type: string
+          example: Password reset link sent to your email.
+    ResetPasswordRes:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 201
+        message:
+          type: string
+          example: Password reset successful.
+
+    CustomerRegistrationError400:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 400
+        error:
+          type: string
+          example: "error whiles processing registration"
+
+    StaffRegistrationError400:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 400
+        error:
+          type: string
+          example: "error whiles processing registration"
+
+    PhoneVerificationError400:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 400
+        error:
+          type: string
+          example: Verification code is invalid/ The requested resource /Services/VAbb433ff462dcf80a27190a3f2b4fd8f7/VerificationCheck was not found
+
+    ForgotPasswordError400:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 400
+        error:
+          type: string
+          example: No user is Associated with this email or phone / Patient not verified
+    ResetPasswordError400:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 400
+        error:
+          type: string
+          example: JWT expired
+    ResourceNotFoundError400:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 400
+        error:
+          type: string
+          example: "The requested resources was not found"
+    SendVerificationCodeRes:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 201
+        message:
+          type: string
+          example: Verification code sent to your phone.
+    BadRequest400:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 400
+        message:
+          type: string
+          example: One of the data needed to complete this operation is missing
+
+    CustomerLoginError400:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 400
+        error:
+          type: string
+          example: Customer not found/ Incorrect password / Customer not verified
+    StaffLoginError400:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 400
+        error:
+          type: string
+          example: Staff not found
+
+    EmailVerificationError400:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 400
+        error:
+          type: string
+          example: Verification code is already used / Verification code is invalid
+
+    PhoneVerificationReq:
+      type: object
+      properties:
+        phone:
+          type: string
+          example: "+2332312121212"
+        code:
+          type: string
+          example: "071343"
+    BudgetDeletionRes:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: Budget deleted successfully
+    VaultRes:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: Vault uploaded successfully
+        result:
+          type: object
+          example:
+            description: splach 1
+            file_url: https://res.cloudinary.com/trimester-save-ltd/image/upload/v1658501903/yihqw6yyhcpnj9z0diz3.jpg
+            cloudinary_id: yihqw6yyhcpnj9z0diz3
+            asset_id: ea86cdc381ee21e0ba1197b7ed9fed17
+            customer: f8ed9ebb-3661-411b-8633-01089187171f
+            _id: 1
+
+    VaultDeletionRes:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: Vault deleted successfully
+
+    NotificationRes:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: Notification returned and read successfully
+        result:
+          type: object
+          example:
+            _id: 5e8f8f8f895679af5ce8fad4
+            customer: f8ed9ebb-3661-411b-8633-01089187171f
+            notification_type: appointment
+            content:
+              type: object
+              properties:
+                title:
+                  type: string
+                  example: Appointment
+                message:
+                  type: string
+                  example: Appointment with Dr. John Doe has been scheduled.
+            alert: Appointment with Dr. John Doe has been scheduled.
+            read: true
+
+    NotificationGRes:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: Notification returned successfully
+        result:
+          type: object
+          example:
+            id: 5e8f8f8f895679af5ce8fad4
+            notification_type: appointment
+            alert: Appointment with Dr. John Doe has been scheduled.
+            created_at: 2020-01-01T00:00:00.000Z
+            updated_at: 2020-01-01T00:00:00.000Z
+    SendVerificationCodeReq:
+      type: object
+      properties:
+        email:
+          type: string
+          example: "joe.doe@test.ca"
+    PatientObject:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "Patient profile returned Successfully"
+        result:
+          type: object
+          example:
+            _id: 624c913a28b71adcc6012a08
+            first_name: John
+            last_name: Doe
+            email: John.doe@test.com
+            phone: "+23322322233"
+            verify_email: true
+            verify_phone: true
+            created_at: 2020-05-05
+            updated_at: 2020-05-05
+            __v: 0
+          token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MjUxOGQ0MjcyZmU
+    UpdatePatientRes:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "Patient profile returned Successfully"
+        result:
+          type: object
+          example:
+            _id: 0232c913a28b71adcc6012a08
+            first_name: John
+            last_name: Doe
+            email: John.doe@test.com
+            phone: "+23322322233"
+            verify_email: true
+            verify_phone: true
+            spouse_name: Jane does
+            spouse_phone: "+23324343433"
+            country: Ghana
+            city: Accra
+            created_at: 2020-05-05
+            updated_at: 2020-05-05
+    200ContactcreationObject:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "Contact created Successfully"
+        result:
+          type: object
+          example:
+            _id: 624c913a28b71adcc6012a08
+            first_name: John
+            last_name: Doe
+            email: a@a.com
+            phone: "+23322322233"
+            message: "Hello"
+    UpdatePatientReq:
+      type: object
+      properties:
+        first_name:
+          type: string
+          example: John
+        last_name:
+          type: string
+          example: Doe
+        spouse_name:
+          type: string
+          example: Jane Doe
+        spouse_phone:
+          type: string
+          example: +23322322233
+        country:
+          type: string
+          example: Ghana
+        city:
+          type: string
+          example: Accra
+        town:
+          type: string
+          example: New Town
+        address:
+          type: string
+          example: 17 Makwa street NT
+        email:
+          type: string
+          example: John.doe@test.com
+        ghana_card:
+          type: string
+          example: GH-12345678AEFTGE9
