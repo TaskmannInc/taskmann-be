@@ -74,9 +74,9 @@ class Task extends BaseEntity {
                     .getOne();
                 // if (order.task) throw new Error('Order has already been assigned to a tasker');
                 if (!tasker) throw new Error('Tasker does not exist');
-                let task = await transactionalEntityManager.findOneBy(Task, { status: task_status.PENDING, tasker: { _id: taskerId } });
-                if (task) throw new Error('Tasker has already been assigned a task');
-                task = new Task();
+                let tasks = await transactionalEntityManager.findBy(Task, { status: task_status.PENDING, tasker: { _id: taskerId } });
+                if (tasks.length > 3) throw new Error('Tasker has already been assigned 3 tasks and can not be assigned more tasks');
+                let task = new Task();
                 task.order = order;
                 task.tasker = tasker;
                 task.status = task_status.PENDING;
@@ -163,7 +163,7 @@ class Task extends BaseEntity {
                     },
                     relations: ['order'],
                 });
-               
+
                 if (!task) throw new Error('Can not perfrom this action on this task');
                 if (action.toUpperCase() !== task_status.CANCELLED && action.toUpperCase() !== task_status.INPROGRESS && action.toUpperCase() !== task_status.COMPLETED) throw new Error('Invalid action, action should be CANCELLED, INPROGRESS or COMPLETED');
                 task.status = action.toUpperCase() as task_status;
@@ -203,6 +203,30 @@ class Task extends BaseEntity {
             throw new Error((err as Error).message);
         }
     }
+
+
+
+    /**
+    * 
+    * @param cart_id id of the cart to be used to create the order
+    * @returns 
+    */
+    async cancelTask(): Promise<any> {
+        try {
+
+            const Manager = Task.getRepository().manager;
+            return Manager.transaction(async transactionalEntityManager => {
+                let task = this;
+                task.status = task_status.CANCELLED;
+                await transactionalEntityManager.save(task);
+                return task;
+            })
+        }
+        catch (err) {
+            throw new Error((err as Error).message);
+        }
+    }
+
 
 }
 

@@ -27,6 +27,11 @@ class Pricetier extends BaseEntity {
     description!: string;
 
     @Column({
+        nullable: true
+    })
+    duration!: number;
+
+    @Column({
         nullable: false,
         default: true
     })

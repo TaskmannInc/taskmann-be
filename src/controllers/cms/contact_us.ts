@@ -12,7 +12,7 @@ import { ValidationError } from 'class-validator';
 async function addContact(req: Request, res: Response): Promise<void> {
     try {
         const contact = await Contact.createContact(req.body);
-        res.status(201).send({ code: 201, message: 'New Job added succesfully', result: contact });
+        res.status(201).send({ code: 201, message: 'Message sent succesfully', result: contact });
     } catch (err) {
         if (err instanceof QueryFailedError) {
             const errMsg = throwTypeOrmQueryFailedErrorMessage(err);

@@ -1448,6 +1448,56 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/InternalServerError500"
+  /api/v1/order/{id}/:
+    patch:
+      security:
+        - JWTAuth: []
+      tags:
+        - Order
+      summary: Cancrl Order by ID
+      description: Endpoint to cancel an Order
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: Order ID
+      requestBody:
+        required: true
+        content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: int
+                    example: 200757
+      responses:
+        200:
+          description: Successfully updated Order status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdateOrderRes"
+        400:
+          description: Bad Request / Order data does not exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError404"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
   /api/v1/orders:
     get:
       security:

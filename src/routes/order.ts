@@ -10,6 +10,7 @@ const orderRoute = Router();
 orderRoute.post("/order/:id", auth, order.createOrder);
 orderRoute.get("/order/:id", auth, order.getOrder);
 orderRoute.get("/orders", auth, order.getOrders);
+orderRoute.patch("/order/:id", auth, order.cancelOrder);
 orderRoute.get("/admin/orders", adminAuth, order.getOrders);
 orderRoute.get("/admin/order/:id", adminAuth, order.getOrder);
 

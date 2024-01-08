@@ -2,7 +2,7 @@ import { Repository, BaseEntity, Entity, Column, PrimaryGeneratedColumn, CreateD
 import Staff from "./staff";
 import Customer from "./customer";
 import Service from "./service";
-import { order_status } from "../enums/enum";
+import { order_status, task_status } from "../enums/enum";
 // import orderCode from "../utils/orderCode";
 import UtilSever from "../utils/util";
 import Cart from "./cart";
@@ -117,6 +117,40 @@ class Order extends BaseEntity {
             throw new Error((err as Error).message);
         }
     }
+
+
+
+    /**
+    * 
+    * @param cart_id id of the cart to be used to create the order
+    * @returns 
+    */
+    async cancelOrder(cancellation_code: string): Promise<any> {
+        try {
+
+            const Manager = Order.getRepository().manager;
+            return Manager.transaction(async transactionalEntityManager => {
+                let order = this;
+                if (order.cancellation_code !== cancellation_code) {
+                    throw new Error("Cancellation code provided is wrong");
+                }
+                order.status = order_status.CANCELLED;
+                const task = await transactionalEntityManager.findOneBy(Task, { order: { _id: order._id } });
+                if (task) {
+                    task.status = task_status.CANCELLED;
+                }
+                await transactionalEntityManager.save(task);
+                await transactionalEntityManager.save(order);
+                return order;
+            })
+        }
+        catch (err) {
+            throw new Error((err as Error).message);
+        }
+    }
+
+
+
 
 
 
