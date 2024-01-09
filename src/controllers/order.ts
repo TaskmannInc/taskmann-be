@@ -121,8 +121,47 @@ async function cancelOrder(req: ICustomerRequest, res: Response): Promise<void> 
         res.status(400).send({ code: 400, error: (error as Error).message });
     }
 }
+async function cancelOrderById(req: ICustomerRequest, res: Response): Promise<void> {
+    try {
+        let order, task;
+        console.log('reg', req.customer, req.params.id);
+        if (req.customer) {
+            order = await Order.findOne({ where: { _id: req.params.order_id, cancellation_code: req.body.code, customer: { _id: req.customer._id } } });
+            if (!order) throw new Error('Order not found');
+            // task = await Task.findOne({ where: { order: { _id: req.params.order_id } } });
+            // if (!task) throw new Error('Task not found');
+            order = await order.cancelOrder(req.params.code);
+            // task = await task.cancelTask(req.params.code);
+        }
+        // else {
+        //     // order = await Order.findOneById(req.params.id);
+        //     order = await Order.findOne({
+        //         where: {
+        //             _id: req.params.id,
+        //             // status: task_status.ACCEPTED || task_status.INPROGRESS,
+        //             // tasker: { _id: req.staff._id }
+        //         },
+        //         relations: ['task']
+        //     });
+        //     // order = await Order.findOneBy({ _id: req.params.id })
+        //     //order = await Order.findOne({ where: {_id: req.params.order_id }}); 
+        // }
+        // // const order = await Order.findOne({ where: {_id: req.params.order_id, customer: { _id: req.customer._id }}});
+        // // const role = await Order.findOne({
+        // //     where: {
+        // //         _id: req.params.order_id,
+        // //         customer: req.customer._id
+        // //     }
+        // // });
+        // if (!order) throw new Error('Order not found');
+        res.status(200).send({ code: 200, message: 'Order', data: order });
+    }
+    catch (error) {
+        res.status(400).send({ code: 400, error: (error as Error).message });
+    }
+}
 
 
 
 
-export default { createOrder, getOrder, getOrders, cancelOrder };
+export default { createOrder, getOrder, getOrders, cancelOrder, cancelOrderById };
