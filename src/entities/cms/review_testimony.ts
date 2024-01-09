@@ -27,6 +27,18 @@ class ReviewTestimony extends BaseEntity {
     })
     statement!: string;
 
+    @Column({
+        nullable: false,
+        unique: false
+    })
+    rating!: string;
+
+    @Column({
+        nullable: false,
+        unique: false
+    })
+    email!: string;
+
     @CreateDateColumn()
     created_at!: Date;
 

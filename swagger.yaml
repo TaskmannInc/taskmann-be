@@ -1498,6 +1498,56 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/InternalServerError500"
+  /api/v1/order/cancel/{order_id}/:
+    patch:
+      security:
+        - JWTAuth: []
+      tags:
+        - Order
+      summary: Cancel Order by ID by Customer
+      description: Endpoint to cancel an Order by Customer
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: Order ID
+      requestBody:
+        required: true
+        content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: int
+                    example: "200757"
+      responses:
+        200:
+          description: Successfully updated Order status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdateOrderRes"
+        400:
+          description: Bad Request / Order data does not exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError400"
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResourceNotFoundError404"
+        500:
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError500"
   /api/v1/orders:
     get:
       security:
@@ -4433,6 +4483,12 @@ components:
         statement:
           type: string
           example: "I love this company"
+        email:
+          type: string
+          example: johndoe@gnail.com
+        rating:
+          type: string
+          example: "5"
     200rtRegisterObject:
       type: object
       properties:
@@ -4448,6 +4504,8 @@ components:
             _id: 624c913a28b71adcc6012a08
             name: John Doe
             statement: I love this company
+            email: johndoe@gnail.com
+            rating: "5"
     200FaqRegisterObject:
       type: object
       properties:
